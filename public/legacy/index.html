@@ -688,22 +688,44 @@ function switchTab(tab) {
 
 async function doLogin() {
   const email = document.getElementById("login-email").value.trim();
-  const pass  = document.getElementById("login-pass").value;
+  const pass = document.getElementById("login-pass").value;
+
   setLoading("login", true);
   clearErr("login-err");
+
   try {
-    const d = await apiFetch("/api/v1/auth/me"); {method:"POST", body:{email, password:pass}});
+    const d = await apiFetch("/api/v1/auth/login", {
+      method: "POST",
+      body: {
+        email,
+        password: pass
+      }
+    });
+
     if (d.pendingVerification) {
       closeModal("auth-modal");
       openOTPModal(d.email || email);
       return;
     }
-    token = d.token; localStorage.setItem("kish_token", token); user = d.user;
-    closeModal("auth-modal"); renderLoggedIn(); toast(`Welcome back, ${user.name}! 👋`,"success"); showView("chat");
-  } catch(e) {
-    if (e.pendingVerification) { closeModal("auth-modal"); openOTPModal(e.email || email); }
-    else showErr("login-err", e.message);
+
+    token = d.token;
+    localStorage.setItem("kish_token", token);
+    user = d.user;
+
+    closeModal("auth-modal");
+    renderLoggedIn();
+    toast(`Welcome back, ${user.name}! 👋`, "success");
+    showView("chat");
+
+  } catch (e) {
+    if (e.pendingVerification) {
+      closeModal("auth-modal");
+      openOTPModal(e.email || email);
+    } else {
+      showErr("login-err", e.message);
+    }
   }
+
   setLoading("login", false);
 }
 
