@@ -12,7 +12,7 @@ export interface AuthUser {
 }
 
 export interface LoginResponse {
-  token: string;
+  accessToken: string;
   refreshToken?: string;
   user: AuthUser;
   pendingVerification?: boolean;
@@ -25,7 +25,7 @@ export interface RegisterResponse {
 }
 
 export interface VerifyOtpResponse {
-  token: string;
+  accessToken: string;
   refreshToken?: string;
   user: AuthUser;
 }
