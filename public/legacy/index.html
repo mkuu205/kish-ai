@@ -370,7 +370,7 @@ footer p{color:var(--dim);font-size:12px;font-family:var(--mono);}
     </div>
   </div>
 
-  <footer><p>© 2025 Kish AI · Built with Claude API · Stripe + M-Pesa · Secure OTP Auth</p></footer>
+  <footer><p>© 2026 Kish AI · Built with Love  · Stripe + M-Pesa · Secure OTP Auth</p></footer>
 </div>
 
 <!-- ═══════════════════════════════════════════
@@ -625,13 +625,35 @@ const SUGGESTIONS = ["What's happening in AI today?","Write me a short story","H
 // ════════════════════════════════════════
 async function init() {
   if (token) {
-    try { const d = await apiFetch("/api/auth/me"); user = d; renderLoggedIn(); }
-    catch { token = null; localStorage.removeItem("kish_token"); }
+    try {
+      const d = await apiFetch("/api/v1/auth/me");
+      user = d.user;
+      renderLoggedIn();
+      showView("chat");
+    } catch {
+      token = null;
+      localStorage.removeItem("kish_token");
+    }
   }
+
   const p = new URLSearchParams(location.search);
-  if (p.get("payment") === "success") { toast("🎉 Welcome to Pro! All features unlocked.", "success"); if(user){user.plan="pro";updatePlanUI();} history.replaceState({},"","/"); }
-  if (p.get("payment") === "cancelled") { toast("Payment cancelled.", "info"); history.replaceState({},"","/"); }
-  buildSidebar(); buildWelcome();
+
+  if (p.get("payment") === "success") {
+    toast("🎉 Welcome to Pro! All features unlocked.", "success");
+    if (user) {
+      user.plan = "pro";
+      updatePlanUI();
+    }
+    history.replaceState({}, "", "/");
+  }
+
+  if (p.get("payment") === "cancelled") {
+    toast("Payment cancelled.", "info");
+    history.replaceState({}, "", "/");
+  }
+
+  buildSidebar();
+  buildWelcome();
 }
 
 // ════════════════════════════════════════
@@ -670,7 +692,7 @@ async function doLogin() {
   setLoading("login", true);
   clearErr("login-err");
   try {
-    const d = await apiFetch("/api/auth/login", {method:"POST", body:{email, password:pass}});
+    const d = await apiFetch("/api/v1/auth/me"); {method:"POST", body:{email, password:pass}});
     if (d.pendingVerification) {
       closeModal("auth-modal");
       openOTPModal(d.email || email);
@@ -691,7 +713,7 @@ async function doRegister() {
   const pass  = document.getElementById("reg-pass").value;
   setLoading("reg", true); clearErr("reg-err");
   try {
-    const d = await apiFetch("/api/auth/register", {method:"POST", body:{name, email, password:pass}});
+    const d = await apiFetch("/api/v1/auth/register", {method:"POST", body:{name, email, password:pass}});
     closeModal("auth-modal"); openOTPModal(d.email || email);
   } catch(e) { showErr("reg-err", e.message); }
   setLoading("reg", false);
@@ -777,7 +799,7 @@ async function doVerifyOTP() {
   if (code.length !== 6) { showErr("otp-err","Enter all 6 digits."); return; }
   setLoading("otp", true); clearErr("otp-err");
   try {
-    const d = await apiFetch("/api/auth/verify-otp", {method:"POST", body:{email:otpEmail, otp:code}});
+    const d = await apiFetch("/api/v1/auth/verify-otp", {method:"POST", body:{email:otpEmail, otp:code}});
     token = d.token; localStorage.setItem("kish_token", token); user = d.user;
     clearInterval(otpTimer);
     closeModal("otp-modal");
@@ -791,7 +813,7 @@ async function doVerifyOTP() {
 async function doResendOTP() {
   document.getElementById("resend-btn").disabled = true;
   try {
-    await apiFetch("/api/auth/resend-otp", {method:"POST", body:{email:otpEmail}});
+  await apiFetch("/api/v1/auth/resend-otp", {method:"POST", body:{email:otpEmail}});
     clearOTPBoxes(); document.querySelector(".otp-box").focus();
     startOTPTimer(600);
     toast("New code sent to your email!", "success");
