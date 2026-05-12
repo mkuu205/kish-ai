@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { useAuth } from "@/context/AuthContext";
@@ -13,7 +13,7 @@ import { isPendingVerification } from "@/utils/errors";
 
 export function AuthModal() {
   const router = useRouter();
-  const { login, register } = useAuth();
+  const { login, register, user } = useAuth();
   const open = useUiStore((s) => s.authModalOpen);
   const tab = useUiStore((s) => s.authModalTab);
   const setAuthModal = useUiStore((s) => s.setAuthModal);
@@ -27,8 +27,19 @@ export function AuthModal() {
   const [busy, setBusy] = useState(false);
   const [loginErr, setLoginErr] = useState<string | null>(null);
   const [regErr, setRegErr] = useState<string | null>(null);
+  // Track whether we should redirect to /chat once user state is populated
+  const pendingRedirect = useRef(false);
 
   const title = useMemo(() => (tab === "login" ? "Welcome Back" : "Create Account"), [tab]);
+
+  // Wait for the user state to be set before navigating, so ProtectedRoute
+  // doesn't see a null user and bounce us back to the login page.
+  useEffect(() => {
+    if (pendingRedirect.current && user) {
+      pendingRedirect.current = false;
+      router.push("/chat");
+    }
+  }, [user, router]);
 
   const close = () => {
     setAuthModal(false);
@@ -48,7 +59,8 @@ export function AuthModal() {
       }
       toast("success", `Welcome back!`);
       close();
-      router.push("/chat");
+      // Set the flag — the useEffect above will push to /chat once user is set
+      pendingRedirect.current = true;
     } catch (e) {
       if (isPendingVerification(e)) {
         close();
