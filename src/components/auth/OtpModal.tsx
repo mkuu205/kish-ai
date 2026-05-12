@@ -13,7 +13,7 @@ import { toast } from "@/store/toastStore";
 
 export function OtpModal() {
   const router = useRouter();
-  const { verifyOtp } = useAuth();
+  const { verifyOtp, user } = useAuth();
   const open = useUiStore((s) => s.otpModalOpen);
   const email = useUiStore((s) => s.otpEmail);
   const setOtpModal = useUiStore((s) => s.setOtpModal);
@@ -25,6 +25,15 @@ export function OtpModal() {
   const [seconds, setSeconds] = useState(600);
   const [resendDisabled, setResendDisabled] = useState(true);
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
+  const pendingRedirect = useRef(false);
+
+  // Wait for user state to be populated before navigating to /chat
+  useEffect(() => {
+    if (pendingRedirect.current && user) {
+      pendingRedirect.current = false;
+      router.push("/chat");
+    }
+  }, [user, router]);
 
   useEffect(() => {
     if (!open) return;
@@ -74,7 +83,7 @@ export function OtpModal() {
       await verifyOtp(email, final);
       toast("success", "Email verified — welcome to Kish AI");
       setOtpModal(false);
-      router.push("/chat");
+      pendingRedirect.current = true;
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Verification failed");
       setDigits(["", "", "", "", "", ""]);
