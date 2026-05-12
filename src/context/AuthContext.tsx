@@ -102,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (d.pendingVerification) {
         return { pendingVerification: true, email: d.email ?? email };
       }
-      persistSession(d.token, d.refreshToken ?? null, d.user);
+      persistSession(d.accessToken, d.refreshToken ?? null, d.user);
       return {};
     },
     [persistSession],
@@ -115,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const verifyOtp = useCallback(
     async (email: string, otp: string) => {
       const d = await verifyOtpRequest(email, otp);
-      persistSession(d.token, d.refreshToken ?? null, d.user);
+      persistSession(d.accessToken, d.refreshToken ?? null, d.user);
     },
     [persistSession],
   );
