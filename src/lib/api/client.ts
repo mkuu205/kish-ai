@@ -28,7 +28,13 @@ function toApiError(err: AxiosError<ApiErrorPayload>): ApiError {
 }
 
 apiClient.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    // Unwrap the backend envelope { success, message, data } → return data directly
+    if (res.data && typeof res.data === "object" && "data" in res.data) {
+      res.data = (res.data as { data: unknown }).data;
+    }
+    return res;
+  },
   (err: AxiosError<ApiErrorPayload>) => Promise.reject(toApiError(err)),
 );
 
