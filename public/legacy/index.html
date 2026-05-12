@@ -702,15 +702,17 @@ async function doLogin() {
       }
     });
 
-    if (d.pendingVerification) {
+    const payload = d.data || d;
+
+    if (payload.pendingVerification) {
       closeModal("auth-modal");
-      openOTPModal(d.email || email);
+      openOTPModal(payload.email || email);
       return;
     }
 
-    token = d.accessToken || d.token;
+    token = payload.accessToken;
     localStorage.setItem("kish_token", token);
-    user = d.user;
+    user = payload.user;
 
     closeModal("auth-modal");
     renderLoggedIn();
@@ -718,12 +720,7 @@ async function doLogin() {
     showView("chat");
 
   } catch (e) {
-    if (e.pendingVerification) {
-      closeModal("auth-modal");
-      openOTPModal(e.email || email);
-    } else {
-      showErr("login-err", e.message);
-    }
+    showErr("login-err", e.message);
   }
 
   setLoading("login", false);
