@@ -627,7 +627,7 @@ async function init() {
   if (token) {
     try {
       const d = await apiFetch("/api/v1/auth/me");
-      user = d.user;
+      user = d.data || d;
       renderLoggedIn();
       showView("chat");
     } catch {
@@ -655,7 +655,7 @@ async function init() {
   buildSidebar();
   buildWelcome();
 }
-
+  
 // ════════════════════════════════════════
 //  API HELPER
 // ════════════════════════════════════════
