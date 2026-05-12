@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+hi<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -708,7 +708,7 @@ async function doLogin() {
       return;
     }
 
-    token = d.token;
+    token = d.accessToken || d.token;
     localStorage.setItem("kish_token", token);
     user = d.user;
 
